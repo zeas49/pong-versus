@@ -88,9 +88,11 @@ class Game:
                 inst_rect = inst_text.get_rect(center=(SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2 + 120 + i * 30))
                 self.screen.blit(inst_text, inst_rect)
 
+            self.custom_cursor.update() # Update custom cursor
+            self.custom_cursor.draw(self.screen) # Draw custom cursor
+
             pygame.display.flip()
             self.clock.tick(60)
-
     def handle_input(self):
         keys = pygame.key.get_pressed()
         mouse_y = pygame.mouse.get_pos()[1]
