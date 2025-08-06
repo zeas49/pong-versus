@@ -5,11 +5,13 @@ class Player(pygame.sprite.Sprite):
         super().__init__()
         self.image = pygame.Surface([width, height])
         self.image.fill(color)
+        self.original_image = self.image.copy() # Store original image for rotation
         self.rect = self.image.get_rect(center=(x, y))
         self.speed = 0 # Initial speed for movement
         self.acceleration_base = 3 # Base acceleration for normal movement
         self.screen_height = screen_height
         self.screen_width = screen_width
+        self.rotation_angle = 0
 
         # Dash variables
         self.dash_active = False
@@ -66,6 +68,11 @@ class Player(pygame.sprite.Sprite):
         if self.rect.bottom > self.screen_height:
             self.rect.bottom = self.screen_height
 
+        # Apply rotation based on y-position
+        self.rotation_angle = -self.rect.centery * 0.04
+        self.image = pygame.transform.rotate(self.original_image, self.rotation_angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
+
     def start_dash(self, direction):
         if self.dash_cooldown <= 0 and not self.charge_active:
             self.dash_active = True
@@ -95,6 +102,8 @@ class HumanPlayer(Player):
         self.acceleration = 0.9 # Acceleration for mouse control
 
     def update(self, target_y):
+        super().update() # Call parent update for dash, charge, and rotation
+
         # Move towards target_y (mouse y-coordinate)
         y_diff = target_y - self.rect.centery
         if abs(y_diff) > self.acceleration:
@@ -105,27 +114,7 @@ class HumanPlayer(Player):
         else:
             self.rect.centery = target_y
 
-        # Apply dash movement if active
-        if self.dash_active:
-            self.rect.y += (self.dash_velocity * self.dash_direction)
-            self.dash_velocity *= self.dash_decay
-            if abs(self.dash_velocity) < 1:
-                self.dash_active = False
-
-        # Update dash cooldown
-        if self.dash_cooldown > 0:
-            self.dash_cooldown -= 1
-
-        # Update charge (for Player 1)
-        if self.charge_active:
-            self.charge_level = min(self.max_charge, self.charge_level + self.charge_rate)
-            # Reduce normal movement speed while charging
-            self.acceleration_base = 3 * 0.5 # Example: half normal speed
-        else:
-            self.charge_level = max(0, self.charge_level - self.charge_decay_rate)
-            self.acceleration_base = 3 # Restore normal speed
-
-        # Boundary checking
+        # Boundary checking (re-check after mouse movement)
         if self.rect.top < 0:
             self.rect.top = 0
         if self.rect.bottom > self.screen_height:
@@ -148,6 +137,8 @@ class AIPlayer(Player):
         self.dash_trigger_distance = 100
 
     def update(self, ball_x, ball_y):
+        super().update() # Call parent update for dash and rotation
+
         # AI logic to follow the ball
         target_y = ball_y
         y_diff = target_y - self.rect.centery
@@ -194,6 +185,11 @@ class AIPlayer(Player):
         if self.rect.bottom > self.screen_height:
             self.rect.bottom = self.screen_height
             self.current_speed = self.min_speed
+
+        # Apply mirrored rotation based on y-position
+        self.rotation_angle = self.rect.centery * 0.04
+        self.image = pygame.transform.rotate(self.original_image, self.rotation_angle)
+        self.rect = self.image.get_rect(center=self.rect.center)
 
         # Restore color after dash
         if not self.dash_active and self.image.get_at((0,0)) != (255, 255, 255, 255):

@@ -6,6 +6,7 @@ from ball import Ball
 from scoreboard import Scoreboard
 from sound_manager import SoundManager
 from star_particles import StarParticleSystem
+from cursor import CrosshairCursor
 
 # Game constants
 SCREEN_WIDTH = 1920
@@ -33,7 +34,8 @@ class Game:
         self.scoreboard = Scoreboard(SCREEN_WIDTH, SCREEN_HEIGHT)
         self.sound_manager = SoundManager()
         self.star_particles = StarParticleSystem(SCREEN_WIDTH, SCREEN_HEIGHT)
-
+        self.custom_cursor = CrosshairCursor()
+        pygame.mouse.set_visible(False) # Hide the default cursor
         # Gradient colors and direction
         self.gradient_color_base = (0, 0, 20) # Dark blue
         self.gradient_direction = 1 # 1 for normal, -1 for inverted
@@ -240,6 +242,7 @@ class Game:
             self.player2.update(self.ball.rect.centerx, self.ball.rect.centery)
             self.ball.update()
             self.star_particles.update()
+            self.custom_cursor.update() # Update custom cursor
             
             # Check collisions and scoring
             self.check_collisions()
@@ -252,6 +255,7 @@ class Game:
             self.ball.draw_wind_trail(self.screen)
             self.all_sprites.draw(self.screen)
             self.scoreboard.draw(self.screen)
+            self.custom_cursor.draw(self.screen) # Draw custom cursor
             
             pygame.display.flip()
             self.clock.tick(60)

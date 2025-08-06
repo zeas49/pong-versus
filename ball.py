@@ -37,7 +37,7 @@ class Ball(pygame.sprite.Sprite):
 
     def update(self):
         # Wall curve avoidance logic
-        wall_proximity_threshold = 150
+        wall_proximity_threshold = 280
         curve_strength = 0.2
 
         # Check proximity to top wall
@@ -62,8 +62,9 @@ class Ball(pygame.sprite.Sprite):
         if self.dx > 0:
             if self.dy < self.max_dy:
                 self.dy += self.ay
-        else:
-            if self.dy > -self.max_dy:
+
+        if self.dx < 0:
+            if self.dy < -self.max_dy:
                 self.dy -= self.ay
 
         # Z acceleration (for 3D effect)
@@ -83,12 +84,12 @@ class Ball(pygame.sprite.Sprite):
         trajectory_angle = math.atan2(self.dy, self.dx) if self.dx != 0 else 0
         angle_factor = abs(math.sin(trajectory_angle))
 
-        base_size_factor = normalized_distance * -45
-        angle_size_factor = angle_factor * -100
-        velocity_factor = (abs(self.dx) + abs(self.dy)) * 6.1
+        base_size_factor = normalized_distance * 295
+        angle_size_factor = angle_factor * 300 # Efeito adicional baseado no ângulo
+        velocity_factor = (abs(self.dx) + abs(self.dy)) * -13.5 # Efeito baseado na velocidade
 
         self.size = base_size_factor + angle_size_factor + velocity_factor + self.base_size
-        self.size = max(42, min(self.size, 120))
+        self.size = max(29, min(self.size, 152))
 
         # Update ball visual size
         self.image = pygame.transform.scale(self.base_image, (int(self.size), int(self.size)))
@@ -100,15 +101,15 @@ class Ball(pygame.sprite.Sprite):
         self.update_wind_trail()
 
         # Wall collision
-        if self.rect.top <= 0:
-            self.rect.top = 0
+        if self.rect.top <= self.screen_height / 2 - 280:
+            self.rect.top = self.screen_height / 2 - 280
             self.dy *= -1
             self.ay *= -1
             self.dx *= 0.95
             self.dy *= 0.95
 
-        if self.rect.bottom >= self.screen_height:
-            self.rect.bottom = self.screen_height
+        if self.rect.bottom >= self.screen_height / 2 + 280:
+            self.rect.bottom = self.screen_height / 2 + 280
             self.dy *= -1
             self.ay *= -1
             self.dx *= 0.95
